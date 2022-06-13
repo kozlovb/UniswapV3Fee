@@ -1,7 +1,4 @@
-import requests
-import json
-import pandas as pd
-from find_closest_tick import *
+from brownie import *
 import math
 """
 Jun 11, 14.50.       - 30 days.     13 May 14.50
@@ -27,8 +24,9 @@ pool id
 
 url = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
 
-ETH_decimals  = 18
-USDT_decimals  = 6
+ETH_decimals = 18
+USDT_decimals = 6
+pool_address = '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36'
 # data about pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
 # https://info.uniswap.org/#/
 
@@ -45,9 +43,16 @@ def price_to_tick(price, decimals):
 # check https://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf one needs to add 10^12 i.e.
 
 
-
-# -196256 3k
-# -203188 1.5K
+def getData(tick_low, tick_up, block):
+    web3.eth.defaultBlock = block
+    pool = Contract.from_explorer(pool_address)
+    tick_values_low = pool.ticks(tick_low)
+    ticklow_fee_Outside = tick_values_low['feeGrowthOutside0X128']
+    tick_values_up = pool.ticks(tick_up)
+    tickup_fee_Outside = tick_values_up['feeGrowthOutside0X128']
+    feeGrowthGlobal0X128 = pool.feeGrowthGlobal0X128()
+    ic = pool.slot0()['tick']
+    return ticklow_fee_Outside, tickup_fee_Outside, ic, feeGrowthGlobal0X128
 
 #for a given token , has tp be applied for both
 def calculate_fee(tickup, ticklow, tickup_fee_Outside_old, ticklow_fee_Outside_old, ic_old, global_fee_old, tickup_fee_Outside_new, ticklow_fee_Outside_new, ic_new, global_fee_new, liquidity):
@@ -75,41 +80,28 @@ def to_regular_numbers(number_128, decimal):
     return number_128/(pow(2,128)*pow(10, decimal))
 #2400 mas o menos -200000
 
-
-tick_up = -199980
 tick_low = -202020
+tick_up = -199980
+
 old_block = 14767479   # (Jun-06-2022 12:13:20 PM +UTC)
 new_block = 14944320   # (Jun-06-2022 08:33:23 PM +UTC)
 
-tick_up_old = requests.post(url, json={'query': query(block=old_block, tick = tick_up)})
-tick_up_new = requests.post(url, json={'query': query(block=new_block, tick = tick_up)})
-tick_low_old = requests.post(url, json={'query': query(block=old_block, tick = tick_low)})
-tick_low_new = requests.post(url, json={'query': query(block=new_block, tick = tick_low)})
+
 
 #tick current is kind of strange I get -199770 which gives the price equivalent to 2111. But the price at that block was
 # $2,006.51 / ETH
-print("OLD UP", tick_up_old.text)
-print("UP NEw", tick_up_new.text)
 
 
-#--------------tick low old--------------------#
-json_data = json.loads(tick_low_old.text)
-ticklow_fee_Outside_old = int(json_data["data"]["ticks"][0]["feeGrowthOutside0X128"])
-#--------------tick up old--------------------#
-json_data = json.loads(tick_up_old.text)
-tickup_fee_Outside_old = int(json_data["data"]["ticks"][0]["feeGrowthOutside0X128"])
-ic_old = int(json_data["data"]["ticks"][0]["pool"]["tick"])
-global_fee_old = int(json_data["data"]["ticks"][0]["pool"]["feeGrowthGlobal0X128"])
-#--------------tick low new--------------------#
-json_data = json.loads(tick_low_new.text)
-ticklow_fee_Outside_new = int(json_data["data"]["ticks"][0]["feeGrowthOutside0X128"])
-#--------------tick up new--------------------#
-json_data = json.loads(tick_up_new.text)
-tickup_fee_Outside_new = int(json_data["data"]["ticks"][0]["feeGrowthOutside0X128"])
-ic_new  = int(json_data["data"]["ticks"][0]["pool"]["tick"])
-global_fee_new = int(json_data["data"]["ticks"][0]["pool"]["feeGrowthGlobal0X128"])
 
-#print("Found this results", tickup_fee_Outside_old, ic_old, global_fee_old)
+#--------------tick low and up old--------------------#
+
+ticklow_fee_Outside_old, tickup_fee_Outside_old, ic_old, global_fee_old = getData(tick_low, tick_up, old_block)
+
+#--------------tick low and up new--------------------#
+
+ticklow_fee_Outside_new, tickup_fee_Outside_new, ic_new, global_fee_new = getData(tick_low, tick_up, new_block)
+
+
 
 current = tick_to_price_ETH_in_USD(-202795)
 print(current)
@@ -125,3 +117,6 @@ print("RESULT", to_regular_numbers(fee, 18))
 
 print("price at tick up", tick_to_price_ETH_in_USD(tick_up))
 print("price at tick low", tick_to_price_ETH_in_USD(tick_low))
+
+def main():
+    pass
