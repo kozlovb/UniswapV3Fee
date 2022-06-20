@@ -1,13 +1,11 @@
 from brownie import *
 import math
 
+
 """Before running the script
 
 export WEB3_INFURA_PROJECT_ID=a3efd95ef45e49a3aa7876780d804743
 export ETHERSCAN_TOKEN=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN
-
-to run script - 
-brownie run request_fee_brownie_both_tokens.py --network mainnet
 
 """
 
@@ -24,11 +22,7 @@ WETH
 USDT
 57.18
 
-I get in 128 numbers
-eth fee 11574384108554583759687502894128478529368500
-(fee/2^128)/10^6 = 0.034
-usd fee 20675291796253282454046314285851000
-(fee/s^128)*10^6 = 60,75
+results that I get
 
 You can get the block number by timestamp, using etherscan's API:
 https://www.epochconverter.com
@@ -38,6 +32,9 @@ pool id
 """
 
 
+"""
+Second check data 
+"""
 
 
 url = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
@@ -61,23 +58,14 @@ def price_to_tick(price, decimals):
 # check https://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf one needs to add 10^12 i.e.
 
 
-def getGlobalFee(pool, tokenIndex):
-    if tokenIndex == '0':
-        return pool.feeGrowthGlobal0X128()
-    elif tokenIndex == '1':
-        return  pool.feeGrowthGlobal1X128()
-    else:
-        exit()  
-
-#tokenIndex is str(0) or str(1)
-def getData(tick_low, tick_up, block, tokenIndex):
+def getData(tick_low, tick_up, block):
     web3.eth.defaultBlock = block
     pool = Contract.from_explorer(pool_address)
     tick_values_low = pool.ticks(tick_low)
-    ticklow_fee_Outside = tick_values_low['feeGrowthOutside' + tokenIndex + 'X128']
+    ticklow_fee_Outside = tick_values_low['feeGrowthOutside1X128']
     tick_values_up = pool.ticks(tick_up)
-    tickup_fee_Outside = tick_values_up['feeGrowthOutside' + tokenIndex + 'X128']
-    feeGrowthGlobal0X128 = getGlobalFee(pool, tokenIndex)
+    tickup_fee_Outside = tick_values_up['feeGrowthOutside1X128']
+    feeGrowthGlobal0X128 = pool.feeGrowthGlobal1X128()
     ic = pool.slot0()['tick']
     return ticklow_fee_Outside, tickup_fee_Outside, ic, feeGrowthGlobal0X128
 
@@ -103,16 +91,8 @@ def calculate_fr(tickup, ticklow, tickup_fee_Outside, ticklow_fee_Outside, ic, g
     feeGrowthInside0X128 = global_fee - feeGrowthBelow0X128 - feeGrowthAbove0X128
     return feeGrowthInside0X128
 
-def to_regular_numbers(number_128, t0_decimals, t1_decimals, tokenIndex):
-    liquidity_coef = t0_decimals - ((t0_decimals - t1_decimals)/2)
-    decimal_coef = 0
-    if tokenIndex == '0':
-        decimal_coef = liquidity_coef - t0_decimals
-    else:
-        decimal_coef = liquidity_coef - t1_decimals
-    return (number_128/(pow(2,128))) * pow(10, decimal_coef)
-
-
+def to_regular_numbers(number_128, decimal):
+    return number_128/(pow(2,128))
 #2400 mas o menos -200000
 
 tick_low = -202020
@@ -127,27 +107,31 @@ new_block = 14944320   # (Jun-06-2022 08:33:23 PM +UTC)
 # $2,006.51 / ETH
 
 
-#tokenIndex is str(0) or str(1)
-def fee_for_tokenType(tick_low, tick_up, new_block, old_block, tokenIndex, liquidity):
-    #--------------tick low and up old--------------------#
-    ticklow_fee_Outside_old, tickup_fee_Outside_old, ic_old, global_fee_old = getData(tick_low, tick_up, old_block, tokenIndex)
-    #--------------tick low and up new--------------------#
-    ticklow_fee_Outside_new, tickup_fee_Outside_new, ic_new, global_fee_new = getData(tick_low, tick_up, new_block, tokenIndex)
-    return calculate_fee(tick_up, tick_low, tickup_fee_Outside_old, ticklow_fee_Outside_old, ic_old, global_fee_old, tickup_fee_Outside_new, ticklow_fee_Outside_new, ic_new, global_fee_new, liquidity)
+
+#--------------tick low and up old--------------------#
+
+ticklow_fee_Outside_old, tickup_fee_Outside_old, ic_old, global_fee_old = getData(tick_low, tick_up, old_block)
+
+#--------------tick low and up new--------------------#
+
+ticklow_fee_Outside_new, tickup_fee_Outside_new, ic_new, global_fee_new = getData(tick_low, tick_up, new_block)
+
+
+
+current = tick_to_price_ETH_in_USD(-202795)
+print(current)
+current = tick_to_price_ETH_in_USD(-199770)
+print(current)
+liquidity  = 250
+fee = calculate_fee(tick_up, tick_low, tickup_fee_Outside_old, ticklow_fee_Outside_old, ic_old, global_fee_old, tickup_fee_Outside_new, ticklow_fee_Outside_new, ic_new, global_fee_new, liquidity)
+print("RESULT in 128 numbers", fee)
+print("RESULT", to_regular_numbers(fee, 18))
+
+# 2067.346 0.00048371337
+# 1685.86 0.000593169
 
 print("price at tick up", tick_to_price_ETH_in_USD(tick_up))
 print("price at tick low", tick_to_price_ETH_in_USD(tick_low))
-"""
-fee0_128 = fee_for_tokenType(tick_low, tick_up, new_block, old_block, "0")
-fee1_128 = fee_for_tokenType(tick_low, tick_up, new_block, old_block, "1")
-
-print("RESULT fee0 in 128 numbers", fee0_128)
-print("RESULT fee0 ", to_regular_numbers(fee0_128, ETH_decimals, USDT_decimals, "0"))
-
-
-print("RESULT fee1 in 128 numbers", fee1_128)
-print("RESULT fee1 ", to_regular_numbers(fee1_128, ETH_decimals, USDT_decimals, "1"))
-"""
 
 def main():
     pass

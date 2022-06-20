@@ -2,10 +2,11 @@ import requests
 import json
 import pandas as pd
 
+
 url = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
 
-def query(block, tick):
-    query = '{ticks(where:{pool_contains:"0x4e68ccd3e89f51c3074ca5072bbac773960dfa36" tickIdx_in:[' + str(tick) + ']} block:{number:' + str(block) + '}){tickIdx feeGrowthOutside0X128 feeGrowthOutside1X128 pool { tick feeGrowthGlobal0X128 feeGrowthGlobal1X128 } } }'
+def query(block, tick, pool_id):
+    query = '{ticks(where:{pool_contains:' + str(pool_id) + ' tickIdx_in:[' + str(tick) + ']} block:{number:' + str(block) + '}){tickIdx feeGrowthOutside0X128 feeGrowthOutside1X128 pool { tick feeGrowthGlobal0X128 feeGrowthGlobal1X128 } } }'
     #print ("we get query")
     #print(query)
     return query
