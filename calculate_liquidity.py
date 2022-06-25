@@ -39,24 +39,10 @@ L = Xtool / (1/sqrt(P) - 1/sqrt(Pb))
 In uniswap there are no doubles, so one has to convert L. Here Y is USd so 10^6, and p is sqrt(10^6/10^18) = 10^-6
 thus L ->  L * 10^12.  or 
 L -> L * 10^(Y_decimal - (Ydecimal - Xdecimal)/2). But we will not use this factor here, rather plug into convertion from uni numbers to real ones. 
+
+usdt pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
+
 """
-
-ETH_decimals = 18
-USDT_decimals = 6
-
-pool_address = '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36'
-
-# parameters date, amount in USD, priceA , priceB
-# return tick_low, tick_up, L (without decimal factor)
-# Xpool, Y pool printed but for now doesn't metter, will metter for impermanent loss though.
-def get_price_for_block(block_number, pool_address):
-    web3.eth.defaultBlock = block_number
-    pool = Contract.from_explorer(pool_address)
-    sqrt_price_x96 = pool.slot0()['sqrtPriceX96']
-    print("sqrt_price_x96", sqrt_price_x96)
-    sqrt_price = sqrt_price_x96 / (pow(2,96) * pow(10, (USDT_decimals - ETH_decimals) / 2 ))
-    print("Price for block",  sqrt_price * sqrt_price)
-    return sqrt_price * sqrt_price
 
 def price_to_int(sqrt_price_x96, token_0_decimal, token_1_decimal):
     print("sqrt_price_x96", sqrt_price_x96)
@@ -87,14 +73,13 @@ def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
     block_early = int(result['result'])
     return block_early, block_now
 
-def calculate_liquidity_A(amount, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block):
-    Xpool = 0   # ETH
-    Ypool = 0   # USD
+# Amount is the toke "1", so the second token
+def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block):
+    Xpool = 0
+    Ypool = 0
     L = 0
     price = price_to_int(int(results_old_block["sqrt_price_x96"]), token_0_decimals, token_1_decimals)
     print("Price is ", price)
-    #Price = 2006
-    #Which price to take ??? 
     if price > priceB:
         Ypool = amount
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
@@ -107,36 +92,8 @@ def calculate_liquidity_A(amount, priceA, priceB, token_0_decimals, token_1_deci
         Ypool = Alpha * amount  / (Alpha + price)                           
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
     return L
-    
-def calculate_liquidity(block_number, amountUSD, priceA, priceB):
-    Xpool = 0   # ETH
-    Ypool = 0   # USD
-    L = 0
-    # 1 find ticks, cause we need to adjust Pa and Pb to actual possible ones 
-    # ticks has to exist .... that's another problem with this solution if tick is dead then ... there are no data.
-    # may be there is a way top fix that by taking feeAccumulated from neighbouting tick and then switching to actual once but may be not.
-    Price = get_price_for_block(block_number, pool_address)
-    #Price = 2006
-    #Which price to take ??? 
-    if Price > priceB:
-        print("in Price > priceB")
-        Ypool = amountUSD
-        L = Ypool / (math.sqrt(Price) - math.sqrt(priceA))
-    elif Price < priceA:
-        print("in Price < priceA")
-        Xpool = amountUSD / Price
-        L = Xpool * (1/math.sqrt(Price) - 1/math.sqrt(priceB))
-    else:
-        Alpha = (math.sqrt(Price) -  math.sqrt(priceA)) / ( (1 / math.sqrt(Price)) - (1 / math.sqrt(priceB)) )   
-        Xpool = amountUSD / (Alpha + Price)
-        Ypool = Alpha * amountUSD  / (Alpha + Price)                           
-        L = Ypool / (math.sqrt(Price) - math.sqrt(priceA))
-    return L
-
 #L_test = calculate_liquidity(14767479, 1000, 1685, 2067)
 #print("L_test is ", L_test)
-
-
 
 # If liquidity is taken with Price = 2006 , price from the block then L = 226.990 - results will be very close to defi lab ones
 # If I take Price from uniswap at that moment then L = 204. then return is 10% lower... 

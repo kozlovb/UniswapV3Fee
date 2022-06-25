@@ -1,5 +1,5 @@
 #!/bin/bash
 
-brownie run request_brownie_pool.py --network mainnet
+brownie run brownie_request_in_brownie_framework.py --network mainnet
 
 

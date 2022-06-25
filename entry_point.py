@@ -2,7 +2,7 @@ import json
 from calculate_liquidity import *
 from find_closest_tick import *
 from request_fee_brownie_both_tokens import *
-from fee_for_tokenType_brownie import *
+from brownie_request import *
 # Enter 2 timestamps -> getting blocks 
 # Enter amount in USD
 # Calculate fee
@@ -28,10 +28,6 @@ from fee_for_tokenType_brownie import *
  }
 }
 """
-
-#1 test WETH/USDT pool
-tick_low = -202020
-tick_up = -199980
 
 #old_block = 14767479   # (Jun-11-2022 14/50 PM +UTC)
 #new_block = 14944320   # (Jun-11-2022 12:47:33 PM +UTC)  $ 00/50/14/01/06/2022
@@ -70,12 +66,12 @@ print("found tick_low", tick_low, "found tick_up", tick_up)
 print("Actual priceA (low) ", priceA , "initial users price", priceA_user)
 print("Actual priceB (low) ", priceB , "initial users price", priceB_user)
 
-results_old_block = brownie_request(old_block, pool_address, tick_low, tick_up, do_request = True)
-results_new_block = brownie_request(new_block, pool_address, tick_low, tick_up)
+results_old_block = brownie_request(old_block, pool_id, tick_low, tick_up, do_request = True)
+results_new_block = brownie_request(new_block, pool_id, tick_low, tick_up)
 
-L = calculate_liquidity_A(amount_token1, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block)
+L = calculate_liquidity(amount_token1, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block)
 print("Liquidity ", L)
-token0_fee, token1_fee = fee_for_tokenType_A(tick_low, tick_up, L, results_old_block, results_new_block)
+token0_fee, token1_fee = fee_for_tokenType(tick_low, tick_up, L, results_old_block, results_new_block)
 
 print("token0_fee", to_regular_numbers(token0_fee, token_0_decimals, token_1_decimals, "0"))
 print("token1_fee", to_regular_numbers(token1_fee, token_0_decimals, token_1_decimals, "1"))
