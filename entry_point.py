@@ -1,7 +1,7 @@
 import json
 from calculate_liquidity import *
 from find_closest_tick import *
-from request_fee_brownie_both_tokens import *
+from calculate_fee_based_on_ticks_data import *
 from brownie_request import *
 # Enter 2 timestamps -> getting blocks 
 # Enter amount in USD

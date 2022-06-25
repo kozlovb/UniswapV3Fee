@@ -1,4 +1,3 @@
-#from brownie import *
 import time
 import datetime
 import math 
@@ -45,14 +44,11 @@ usdt pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
 """
 
 def price_to_int(sqrt_price_x96, token_0_decimal, token_1_decimal):
-    print("sqrt_price_x96", sqrt_price_x96)
     sqrt_price = sqrt_price_x96 / (pow(2,96) * pow(10, (token_1_decimal - token_0_decimal) / 2 ))
-    print("Price for block",  sqrt_price * sqrt_price)
     return sqrt_price * sqrt_price
 
 ### NORE: all in current timezone
 def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
-    # get linux timestamp
     seconds_in_days = 86400
     block_now = 0
     block_early = 0
@@ -79,7 +75,6 @@ def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decima
     Ypool = 0
     L = 0
     price = price_to_int(int(results_old_block["sqrt_price_x96"]), token_0_decimals, token_1_decimals)
-    print("Price is ", price)
     if price > priceB:
         Ypool = amount
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
