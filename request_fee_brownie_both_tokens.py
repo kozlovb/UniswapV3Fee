@@ -1,4 +1,4 @@
-from brownie import *
+#from brownie import *
 import math
 
 """Before running the script
@@ -18,6 +18,9 @@ Jun 11, 14.50.       - 30 days.     13 May 14.50
 Block now 14944320
 Block 30 days ago
 14767479
+
+14767479
+14761163 14944320
 
 WETH
 0.03111
@@ -51,12 +54,12 @@ pool_address = '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36'
 #data about token like name decimals ..
 # https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3/graphql?query=query+MyQuery+%7B%0A++pool%28id%3A+%220x4e68ccd3e89f51c3074ca5072bbac773960dfa36%22%29+%7B%0A++++token0+%7B%0A++++++symbol%0A++++++decimals%0A++++%7D%0A++%7D%0A%7D
 
-def tick_to_price(tick, decimals):
-    return pow(1.0001,tick) / pow(10, decimals)
-def tick_to_price_ETH_in_USD(tick):
-    return pow(1.0001,tick)*pow(10, ETH_decimals-USDT_decimals)
-def price_to_tick(price, decimals):
-    math.log(price, 1.001)/pow(10, decimals)
+#def tick_to_price(tick, decimals):
+#    return pow(1.0001,tick) / pow(10, decimals)
+#def tick_to_price_ETH_in_USD(tick):
+#    return pow(1.0001,tick)*pow(10, ETH_decimals-USDT_decimals)
+#def price_to_tick(price, decimals):
+#    math.log(price, 1.001)/pow(10, decimals)
 # example present tick ic is -201039
 # check https://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf one needs to add 10^12 i.e.
 
@@ -126,6 +129,14 @@ new_block = 14944320   # (Jun-06-2022 08:33:23 PM +UTC)
 #tick current is kind of strange I get -199770 which gives the price equivalent to 2111. But the price at that block was
 # $2,006.51 / ETH
 
+def fee_for_tokenType_A(tick_low, tick_up, L, results_old_block, results_new_block):
+    token_0_fee = calculate_fee(tick_up, tick_low, results_old_block["tickup_fee_0_Outside"], results_old_block["ticklow_fee_0_Outside"], 
+     results_old_block["current_index"], results_old_block["feeGrowthGlobal0X128"], results_new_block["tickup_fee_0_Outside"], 
+     results_new_block["ticklow_fee_0_Outside"], results_new_block["current_index"], results_new_block["feeGrowthGlobal0X128"], L)
+    token_1_fee = calculate_fee(tick_up, tick_low, results_old_block["tickup_fee_1_Outside"], results_old_block["ticklow_fee_1_Outside"], 
+     results_old_block["current_index"], results_old_block["feeGrowthGlobal1X128"], results_new_block["tickup_fee_1_Outside"], 
+     results_new_block["ticklow_fee_1_Outside"], results_new_block["current_index"], results_new_block["feeGrowthGlobal1X128"], L) 
+    return token_0_fee, token_1_fee
 
 #tokenIndex is str(0) or str(1)
 def fee_for_tokenType(tick_low, tick_up, new_block, old_block, tokenIndex, liquidity):
@@ -135,8 +146,8 @@ def fee_for_tokenType(tick_low, tick_up, new_block, old_block, tokenIndex, liqui
     ticklow_fee_Outside_new, tickup_fee_Outside_new, ic_new, global_fee_new = getData(tick_low, tick_up, new_block, tokenIndex)
     return calculate_fee(tick_up, tick_low, tickup_fee_Outside_old, ticklow_fee_Outside_old, ic_old, global_fee_old, tickup_fee_Outside_new, ticklow_fee_Outside_new, ic_new, global_fee_new, liquidity)
 
-print("price at tick up", tick_to_price_ETH_in_USD(tick_up))
-print("price at tick low", tick_to_price_ETH_in_USD(tick_low))
+#print("price at tick up", tick_to_price_ETH_in_USD(tick_up))
+#print("price at tick low", tick_to_price_ETH_in_USD(tick_low))
 """
 fee0_128 = fee_for_tokenType(tick_low, tick_up, new_block, old_block, "0")
 fee1_128 = fee_for_tokenType(tick_low, tick_up, new_block, old_block, "1")

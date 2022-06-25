@@ -42,6 +42,7 @@ url = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
 ETH_decimals = 18
 USDT_decimals = 6
 pool_address = '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36'
+
 # data about pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
 # https://info.uniswap.org/#/
 

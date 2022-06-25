@@ -58,9 +58,14 @@ def get_price_for_block(block_number, pool_address):
     print("Price for block",  sqrt_price * sqrt_price)
     return sqrt_price * sqrt_price
 
+def price_to_int(sqrt_price_x96, token_0_decimal, token_1_decimal):
+    print("sqrt_price_x96", sqrt_price_x96)
+    sqrt_price = sqrt_price_x96 / (pow(2,96) * pow(10, (token_1_decimal - token_0_decimal) / 2 ))
+    print("Price for block",  sqrt_price * sqrt_price)
+    return sqrt_price * sqrt_price
 
 ### NORE: all in current timezone
-def blocksFromDate(seconds, minutes, hour, day, month, year, differenceInDays):
+def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
     # get linux timestamp
     seconds_in_days = 86400
     block_now = 0
@@ -75,13 +80,34 @@ def blocksFromDate(seconds, minutes, hour, day, month, year, differenceInDays):
     result  = json.loads(resp.data)
     block_now = int(result['result'])
 
-    url = 'https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=' + str(int(timestamp)-seconds_in_days) + '&closest=before&apikey=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN'
+    url = 'https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=' + str(int(timestamp)-differenceInDays*seconds_in_days) + '&closest=before&apikey=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN'
     http = urllib3.PoolManager()
     resp = http.request('GET', url)
     result  = json.loads(resp.data)
     block_early = int(result['result'])
     return block_early, block_now
 
+def calculate_liquidity_A(amount, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block):
+    Xpool = 0   # ETH
+    Ypool = 0   # USD
+    L = 0
+    price = price_to_int(int(results_old_block["sqrt_price_x96"]), token_0_decimals, token_1_decimals)
+    print("Price is ", price)
+    #Price = 2006
+    #Which price to take ??? 
+    if price > priceB:
+        Ypool = amount
+        L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
+    elif price < priceA:
+        Xpool = amount / price
+        L = Xpool * (1/math.sqrt(price) - 1/math.sqrt(priceB))
+    else:
+        Alpha = (math.sqrt(price) -  math.sqrt(priceA)) / ( (1 / math.sqrt(price)) - (1 / math.sqrt(priceB)) )   
+        Xpool = amount / (Alpha + price)
+        Ypool = Alpha * amount  / (Alpha + price)                           
+        L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
+    return L
+    
 def calculate_liquidity(block_number, amountUSD, priceA, priceB):
     Xpool = 0   # ETH
     Ypool = 0   # USD
@@ -93,9 +119,11 @@ def calculate_liquidity(block_number, amountUSD, priceA, priceB):
     #Price = 2006
     #Which price to take ??? 
     if Price > priceB:
+        print("in Price > priceB")
         Ypool = amountUSD
         L = Ypool / (math.sqrt(Price) - math.sqrt(priceA))
     elif Price < priceA:
+        print("in Price < priceA")
         Xpool = amountUSD / Price
         L = Xpool * (1/math.sqrt(Price) - 1/math.sqrt(priceB))
     else:
