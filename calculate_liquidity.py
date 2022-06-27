@@ -1,8 +1,6 @@
-import time
-import datetime
 import math 
-import json
-import urllib3
+from common import *
+
 """
 
 1. Choose position
@@ -43,31 +41,6 @@ usdt pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
 
 """
 
-def price_to_int(sqrt_price_x96, token_0_decimal, token_1_decimal):
-    sqrt_price = sqrt_price_x96 / (pow(2,96) * pow(10, (token_1_decimal - token_0_decimal) / 2 ))
-    return sqrt_price * sqrt_price
-
-### NORE: all in current timezone
-def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
-    seconds_in_days = 86400
-    block_now = 0
-    block_early = 0
-    s = f"{seconds}/{minutes}/{hour}/{day}/{month}/{year}"
-    timestamp  = time.mktime(datetime.datetime.strptime(s, "%S/%M/%H/%d/%m/%Y").timetuple())
-    http = urllib3.PoolManager()
-    print("my timestamp ", timestamp)
-
-    url = 'https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=' + str(int(timestamp)) + '&closest=before&apikey=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN'
-    resp = http.request('GET', url)
-    result  = json.loads(resp.data)
-    block_now = int(result['result'])
-
-    url = 'https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=' + str(int(timestamp)-differenceInDays*seconds_in_days) + '&closest=before&apikey=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN'
-    http = urllib3.PoolManager()
-    resp = http.request('GET', url)
-    result  = json.loads(resp.data)
-    block_early = int(result['result'])
-    return block_early, block_now
 
 # Amount is the toke "1", so the second token
 def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block):
@@ -87,11 +60,6 @@ def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decima
         Ypool = Alpha * amount  / (Alpha + price)                           
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
     return L
-#L_test = calculate_liquidity(14767479, 1000, 1685, 2067)
-#print("L_test is ", L_test)
-
-# If liquidity is taken with Price = 2006 , price from the block then L = 226.990 - results will be very close to defi lab ones
-# If I take Price from uniswap at that moment then L = 204. then return is 10% lower... 
 
 def main():
     pass

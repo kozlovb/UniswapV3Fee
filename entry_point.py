@@ -1,4 +1,5 @@
 import json
+from common import *
 from calculate_liquidity import *
 from find_closest_tick import *
 from calculate_fee_based_on_ticks_data import *
@@ -29,30 +30,65 @@ from brownie_request import *
 }
 """
 
-#old_block = 14767479   # (Jun-11-2022 14/50 PM +UTC)
-#new_block = 14944320   # (Jun-11-2022 12:47:33 PM +UTC)  $ 00/50/14/01/06/2022
-#def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
+
+"""
+
+old_block, new_block  = blocksFromDate(2022, 6, 26, 0, 18, 50, differenceInDays = 30)
+
 token_0_decimals = 18
 token_1_decimals = 6
 pool_id = '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36'
 amount_token1 = 1000
-priceA_user = 1685
-priceB_user = 2067
-
-#old_block = 14767479
+priceA_user = 1006.32
+priceB_user = 1636
 """
+#result token0_fee 0.036181617173859856
+# result token1_fee 41.372097991389566
+# result defy lab 0.04276
+#result defy lab 49.16
+
+
+
+
+
+
+
+
 #USDC / WETH
-pool_id  = "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
-amount_token0 = 1
-priceA = 1199.97
-priceB = 2499.91
-# date1 = 00/26/13/20/06/2022
+"""
+old_block, new_block  = blocksFromDate(2022, 6, 26, 23, 42, 00, differenceInDays = 8)
+
+pool_id = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+
+amount_token1 = 10
+priceA_user = 0.000455544
+priceB_user = 0.00124818
+
 token_0_decimals = 6
 token_1_decimals = 18
-"""
+this code results:
+token0_fee 101.72732823020415
+token1_fee 0.08396599791129618
 
-old_block, new_block  = blocksFromDate(2022, 6, 11, 14, 47, 33, differenceInDays = 30)
+defi lab results : 
+98.98
+0.08202
+"""
+#BTC/ETH
+
+old_block, new_block  = blocksFromDate(2022, 6, 27, 2, 4, 00, differenceInDays = 30)
+token_0_decimals = 8
+token_1_decimals = 18
+amount_token1 = 10
+priceA_user = 15.3461
+priceB_user = 20.3452
+pool_id = "0xcbcdf9626bc03e24f779434178a73a0b4bad62ed"
 print("Blocks ", old_block, new_block)
+#token0_fee 0.014576350420066372
+#token1_fee 0.2740428391766797
+#defi lab results
+#0.0149
+#0.283
 
 tick_l=price_to_tick(priceA_user, token_0_decimals, token_1_decimals)
 tick_u=price_to_tick(priceB_user, token_0_decimals, token_1_decimals)

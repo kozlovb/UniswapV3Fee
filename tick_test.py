@@ -2,10 +2,9 @@ import requests
 from brownie import *
 
 
-# INFURA PROJECT ID
-# a3efd95ef45e49a3aa7876780d804743
+#this file is taken from someones github
+#it proves that unfortunately the graph has just the wrong data ....
 
-## set vars
 pool_address = "0x4e68ccd3e89f51c3074ca5072bbac773960dfa36"
 tick = "-199980"
 block_number = 14767479
@@ -36,8 +35,7 @@ feeGrowthGlobal0X128 =   pool.feeGrowthGlobal0X128()
 print("blockchaion feeGrowthGlobal0X128", feeGrowthGlobal0X128)
 
 print("pool.slot0.tick", pool.slot0())
-#print("pool.slot0.sqrtPriceX96", pool.slot0.sqrtPriceX96)
-#(3640401029766977536528031, -199770, 9, 30, 30, 0, True)
+
 
 graph_resp = run_query(query)
 
