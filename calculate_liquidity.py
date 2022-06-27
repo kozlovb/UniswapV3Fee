@@ -40,14 +40,17 @@ L -> L * 10^(Y_decimal - (Ydecimal - Xdecimal)/2). But we will not use this fact
 usdt pool 0x4e68ccd3e89f51c3074ca5072bbac773960dfa36
 
 """
-
+# Amount is the toke "1", so the second token
+def calculate_liquidity_unbounded(amount, token_0_decimals, token_1_decimals, sqrt_price_x96):
+    price = price_to_int(sqrt_price_x96, token_0_decimals, token_1_decimals)
+    return amount/math.sqrt(price)    
 
 # Amount is the toke "1", so the second token
-def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block):
+def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decimals, sqrt_price_x96):
     Xpool = 0
     Ypool = 0
     L = 0
-    price = price_to_int(int(results_old_block["sqrt_price_x96"]), token_0_decimals, token_1_decimals)
+    price = price_to_int(sqrt_price_x96, token_0_decimals, token_1_decimals)
     if price > priceB:
         Ypool = amount
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))

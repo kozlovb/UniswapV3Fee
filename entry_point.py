@@ -105,7 +105,7 @@ print("Actual priceB (low) ", priceB , "initial users price", priceB_user)
 results_old_block = brownie_request(old_block, pool_id, tick_low, tick_up, do_request = True)
 results_new_block = brownie_request(new_block, pool_id, tick_low, tick_up)
 
-L = calculate_liquidity(amount_token1, priceA, priceB, token_0_decimals, token_1_decimals, results_old_block)
+L = calculate_liquidity(amount_token1, priceA, priceB, token_0_decimals, token_1_decimals, int(results_old_block["sqrt_price_x96"]))
 print("Liquidity ", L)
 token0_fee, token1_fee = fee_for_tokenType(tick_low, tick_up, L, results_old_block, results_new_block)
 
