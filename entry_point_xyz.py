@@ -5,7 +5,7 @@ from aggregate_fee_by_hour import *
 
 #old_block, new_block  = blocksFromDate(2022, 6, 27, 18, 29, 00, differenceInDays = 11)
 old_block = 14974324 
-new_block =15035252
+new_block = 15035252
 token_0_decimals = 8
 token_1_decimals = 18
 amount_token1 = 10
@@ -25,8 +25,16 @@ sqrt_price_x96 = get_sq_price_for_block(pool_id, old_block)
 
 L = calculate_liquidity(amount_token1, priceA, priceB, token_0_decimals, token_1_decimals, sqrt_price_x96)
 
-fee0, fee1 =  aggregate_fee_by_hour_when_in_range(pool_id, token_0_decimals, token_1_decimals, priceA, priceB, 2022, 6, 27, 16, 29, 00, 11)
+fee0, fee1 = aggregate_fee_by_hour_when_in_range(pool_id, token_0_decimals, token_1_decimals, priceA, priceB, 2022, 6, 27, 16, 29, 00, 11, L)
 print("fee0", fee0)
 print("fee1", fee1)
 print("token0_fee", to_regular_numbers(fee0, token_0_decimals, token_1_decimals, "0"))
 print("token1_fee", to_regular_numbers(fee1, token_0_decimals, token_1_decimals, "1"))
+
+
+#My result 
+#token0_fee 0.0048696495789142275
+#token1_fee 0.0813087261418996
+
+# xyz result
+# 0.004861
