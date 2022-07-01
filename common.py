@@ -17,7 +17,6 @@ def blocksFromDate(year, month, day, hour, minutes, seconds, differenceInDays):
     s = f"{seconds}/{minutes}/{hour}/{day}/{month}/{year}"
     timestamp  = time.mktime(datetime.datetime.strptime(s, "%S/%M/%H/%d/%m/%Y").timetuple())
     http = urllib3.PoolManager()
-    print("my timestamp ", timestamp)
 
     url = 'https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=' + str(int(timestamp)) + '&closest=before&apikey=ABRCM9H8AIM911I5H7GNGDU9EJU53YCGCN'
     resp = http.request('GET', url)
@@ -51,7 +50,6 @@ def get_sq_price_for_block(pool_id, old_block):
     query = '{ pool( id: "'+str(pool_id)+'" block: {number: '+str(old_block)+'}) {sqrtPrice} }'
     result = requests.post(url, json={'query': query})
     json_data = json.loads(result.text)
-    print("price res", json_data)
     return int(json_data["data"]["pool"]["sqrtPrice"])
 
 def getFeesAndPrices(timestamp_old, timestamp_now, pool_id):
@@ -70,10 +68,10 @@ def getFeesAndPrices(timestamp_old, timestamp_now, pool_id):
         sqrtPrice
       }
     }""" % (str(pool_id), str(timestamp_old), str(int(number_of_hours)))
-    print("query getFeesAndPrices", query)
+    
     result = requests.post(url, json={'query': query})
     json_data = json.loads(result.text)
-    print("poolHourDatas res", json_data)
+    
     return json_data["data"]["poolHourDatas"]
 
 

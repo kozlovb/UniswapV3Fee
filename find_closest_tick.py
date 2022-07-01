@@ -22,10 +22,7 @@ def find_closest_tick(tick, pool_id, block, max_diff=500, lower = True):
 
     for i in range_to_loop:
         tick_i = requests.post(url, json={'query': query(block, i, str(pool_id))})
-        print("i = ", i)
-        print(tick_i.text)
         json_data = json.loads(tick_i.text)
-        print("json_data", json_data)
         df = pd.DataFrame(json_data["data"]["ticks"])
         if len(df) > 0:
             print("Found tick", i)

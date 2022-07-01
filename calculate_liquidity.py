@@ -62,6 +62,7 @@ def calculate_liquidity(amount, priceA, priceB, token_0_decimals, token_1_decima
         Xpool = amount / (Alpha + price)
         Ypool = Alpha * amount  / (Alpha + price)                           
         L = Ypool / (math.sqrt(price) - math.sqrt(priceA))
+    print("L ", L)    
     return L
 
 def main():
